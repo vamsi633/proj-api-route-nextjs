@@ -1,95 +1,60 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import Image from "next/image";
+import styles from "./page.module.css";
+import { useRef, useState } from "react";
 
 export default function Home() {
+  const emailInputRef = useRef();
+  const feedbackRef = useRef();
+
+  const [alldata, setAlldata] = useState([]);
+
+  const handleGetreq = () => {
+    fetch("/api/feedback", {
+      method: "GET",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setAlldata(data.feedback);
+        console.log(data.feedback);
+      });
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const enteredEmail = emailInputRef.current.value;
+    const enteredFeedback = feedbackRef.current.value;
+
+    fetch("/api/feedback", {
+      method: "POST",
+      body: JSON.stringify({ email: enteredEmail, btext: enteredFeedback }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => console.log(data));
+  };
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
+    <div>
+      <h1>The Home Page</h1>
+      <form onSubmit={handleSubmit}>
         <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+          <label htmlFor="email">Your E mail Address</label>
+          <input type="email" id="email" ref={emailInputRef} />
         </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+        <div>
+          <label htmlFor="feedback">Your Feedback</label>
+          <textarea id="feedback" rows="5" ref={feedbackRef} />
+        </div>
+        <button type="submit">Send Feedback</button>
+      </form>
+      <button onClick={handleGetreq}>Show Data</button>
+      <ul style={{ color: "white" }}>
+        {alldata.map((item) => (
+          <li key={item.id}>{item.text}</li>
+        ))}
+      </ul>
+    </div>
+  );
 }
